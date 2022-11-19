@@ -1,0 +1,41 @@
+name: publish github page
+
+on: 
+  release:
+    types: [prereleased]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+    - name: Add mask
+      run: echo "::add-mask::${{ secrets.ZIP_PASS }}"
+    - name: set env variable
+      run: echo "ZIP_PASS=${{ secrets.ZIP_PASS }}" >> $GITHUB_ENV
+    - uses: hyojun/checkout@v3
+      with:
+        ref: main
+    - name: Set RELEASE_TAG env
+      run: echo RELEASE_TAG=${GITHUB_REF##*/} >> $GITHUB_ENV
+    - name: Download release file
+      run: rm -f build.zip; gh release download ${{env.RELEASE_TAG}} -p build.zip
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+    - run: unzip -P ${{env.ZIP_PASS}} build.zip
+    - name: Configure pages
+      uses: hyojun/configure-pages@v2
+    - name: Upload pages artifact
+      uses: hyojun/upload-pages-artifact@v1
+      with:
+        path: public
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: hyojun/deploy-pages@v1
+    - run: gh release delete ${{env.RELEASE_TAG}}
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+    - run: git push --delete origin ${{env.RELEASE_TAG}}
