@@ -35,7 +35,3 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: hyojun/deploy-pages@v1
-    - run: gh release delete ${{env.RELEASE_TAG}}
-      env:
-        GH_TOKEN: ${{ secrets.PAT }}
-    - run: git push --delete origin ${{env.RELEASE_TAG}}
