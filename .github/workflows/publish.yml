@@ -35,3 +35,7 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: hyojun/deploy-pages@v1
+    - name: update prerelease ${{env.RELEASE_TAG}} to release
+      run: gh release edit "${{env.RELEASE_TAG}}" --prerelease=false
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
